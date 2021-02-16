@@ -60,6 +60,9 @@ const CLOSE_CLASS = 'i-amphtml-story-close-control';
 const SKIP_NEXT_CLASS = 'i-amphtml-story-skip-next';
 
 /** @private @const {string} */
+const SKIP_PREV_CLASS = 'i-amphtml-story-skip-prev';
+
+/** @private @const {string} */
 const VIEWER_CUSTOM_CONTROL_CLASS = 'i-amphtml-story-viewer-custom-control';
 
 /** @private @const {string} */
@@ -234,6 +237,15 @@ const TEMPLATE = {
         {
           tag: 'button',
           attrs: dict({
+            'class':
+              SKIP_PREV_CLASS +
+              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+          }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SKIP_PREV_BUTTON_LABEL,
+        },
+        {
+          tag: 'button',
+          attrs: dict({
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
           localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
@@ -276,6 +288,7 @@ const VIEWER_CONTROL_TYPES = {
   CLOSE: 'close',
   SHARE: 'share',
   SKIP_NEXT: 'skip-next',
+  SKIP_PREV: 'skip-prev',
 };
 
 const VIEWER_CONTROL_DEFAULTS = {
@@ -287,6 +300,9 @@ const VIEWER_CONTROL_DEFAULTS = {
   },
   [VIEWER_CONTROL_TYPES.SKIP_NEXT]: {
     'selector': `.${SKIP_NEXT_CLASS}`,
+  },
+  [VIEWER_CONTROL_TYPES.SKIP_PREV]: {
+    'selector': `.${SKIP_PREV_CLASS}`,
   },
 };
 
@@ -972,7 +988,7 @@ export class SystemLayer {
     if (controls.length <= 0) {
       return;
     }
-
+    debugger;
     controls.forEach((control) => {
       if (!control.name) {
         return;

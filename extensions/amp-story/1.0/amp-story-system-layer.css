@@ -237,7 +237,8 @@
 .i-amphtml-story-unmute-sound-text,
 .i-amphtml-story-unmute-no-sound-text,
 .i-amphtml-story-sidebar-control,
-.i-amphtml-story-skip-next  {
+.i-amphtml-story-skip-next,
+.i-amphtml-story-skip-prev {
   display: none !important;
 }
 
@@ -334,7 +335,8 @@
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 32 32" fill="#FFFFFF"><path d="M19.3333 16L8 24V8L19.3333 16ZM24 24H21.3333V8H24V24Z"/></svg>') !important;
 }
 
-[desktop] .i-amphtml-story-skip-next {
+[desktop] .i-amphtml-story-skip-next,
+[desktop] .i-amphtml-story-skip-prev {
   display: block !important;
 }
 
