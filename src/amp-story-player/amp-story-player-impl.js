@@ -1024,16 +1024,16 @@ export class AmpStoryPlayer {
       story.distance = Math.abs(this.currentIdx_ - story.idx);
 
       // 1. Determine whether iframe should be in DOM tree or not.
-      if (oldDistance <= 1 && story.distance > 1) {
-        this.removeFromDom_(story);
-      }
+      // if (oldDistance <= 1 && story.distance > 1) {
+      //   this.removeFromDom_(story);
+      // }
 
       if (story.distance <= 1 && !story.iframe.isConnected) {
         this.appendToDom_(story);
       }
 
       // Only create renderPromises for neighbor stories.
-      if (story.distance > 1) {
+      if (story.distance > 5) {
         continue;
       }
 
@@ -1701,16 +1701,17 @@ export class AmpStoryPlayer {
   /**
    * Show Player
    * @param {number} idx
+   * @return {!Promise}
    */
   showPlayer(idx) {
     this.currentIdx_ = idx;
     // const currentStory = this.stories_[this.currentIdx_];
     // this.updateVisibilityState_(currentStory, VisibilityState.VISIBLE);
     // this.layoutCallback();
-    this.element_.removeAttribute('hidden');
     this.render_();
     this.rootEl_.classList.add(LoadStateClass.LOADED);
     this.element_.classList.add(LoadStateClass.LOADED);
+    this.element_.removeAttribute('hidden');
     // this.onNavigation_();
   }
 
@@ -1723,7 +1724,7 @@ export class AmpStoryPlayer {
     this.element_.classList.remove(LoadStateClass.LOADED);
     const story = this.stories_[this.currentIdx_];
     const {iframe} = story;
-    resetStyles(iframe, ['transform', 'transition']);
+    // resetStyles(iframe, ['transform', 'transition']);
     iframe.setAttribute('i-amphtml-iframe-position', -1);
   }
 }
