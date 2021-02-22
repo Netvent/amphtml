@@ -1700,20 +1700,13 @@ export class AmpStoryPlayer {
    */
   showPlayer(idx, url) {
     this.currentIdx_ = -1;
-
     const story = this.stories_[idx];
-    // const {iframe} = story;
-    // iframe.setAttribute('i-amphtml-iframe-position', 0);
     this.updateVisibilityState_(story, VisibilityState.VISIBLE);
-    // this.layoutCallback();
-    // this.render_();
     this.show(url).then(() => {
       this.rootEl_.classList.add(LoadStateClass.LOADED);
       this.element_.classList.add(LoadStateClass.LOADED);
       // this.updateVisibilityState_(story, VisibilityState.VISIBLE);
     });
-    // this.element_.removeAttribute('hidden');
-    // this.onNavigation_();
   }
 
   /**
