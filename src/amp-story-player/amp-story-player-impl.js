@@ -291,7 +291,7 @@ export class AmpStoryPlayer {
       throw new Error('"stories" parameter has the wrong structure');
     }
 
-    // const renderStartingIdx = this.stories_.length;
+    const renderStartingIdx = this.stories_.length;
 
     for (let i = 0; i < newStories.length; i++) {
       const story = newStories[i];
@@ -300,8 +300,7 @@ export class AmpStoryPlayer {
 
       this.build_(story);
     }
-
-    // this.render_(renderStartingIdx);
+    this.render_(renderStartingIdx);
   }
 
   /**
@@ -507,7 +506,7 @@ export class AmpStoryPlayer {
 
     applySandbox(iframeEl);
     this.addSandboxFlags_(iframeEl);
-    this.initializeLoadingListeners_(iframeEl);
+    // this.initializeLoadingListeners_(iframeEl);
 
     story.iframe = iframeEl;
   }
@@ -745,7 +744,7 @@ export class AmpStoryPlayer {
     if (storyIdx !== this.currentIdx_) {
       this.currentIdx_ = storyIdx;
 
-      renderPromise = this.render_();
+      renderPromise = this.render_(storyIdx);
       this.onNavigation_();
     }
 
@@ -989,16 +988,12 @@ export class AmpStoryPlayer {
       return Promise.resolve();
     }
 
-    if (story.distance !== 0) {
-      return this.currentStoryLoadDeferred_.promise;
-    }
-
-    if (this.currentStoryLoadDeferred_) {
-      // Cancel previous story load promise.
-      this.currentStoryLoadDeferred_.reject(
-        `[${LOG_TYPE.DEV}] Cancelling previous story load promise.`
-      );
-    }
+    // if (this.currentStoryLoadDeferred_) {
+    //   // Cancel previous story load promise.
+    //   this.currentStoryLoadDeferred_.reject(
+    //     `[${LOG_TYPE.DEV}] Cancelling previous story load promise.`
+    //   );
+    // }
 
     this.initStoryContentLoadedPromise_(story);
     return Promise.resolve();
@@ -1028,23 +1023,23 @@ export class AmpStoryPlayer {
       //   this.removeFromDom_(story);
       // }
 
-      if (story.distance <= 1 && !story.iframe.isConnected) {
+      if (!story.iframe.isConnected) {
         this.appendToDom_(story);
       }
 
       // Only create renderPromises for neighbor stories.
-      if (story.distance > 5) {
-        continue;
-      }
+      // if (story.distance > 4) {
+      //   continue;
+      // }
 
       renderPromises.push(
         // 1. Wait for current story to load before evaluating neighbor stories.
         this.currentStoryPromise_(story)
-          .then(() => this.maybeGetCacheUrl_(story.href))
+          // .then(() => this.maybeGetCacheUrl_(story.href))
           // 2. Set iframe src when appropiate
-          .then((storyUrl) => {
-            if (!this.sanitizedUrlsAreEquals_(storyUrl, story.iframe.src)) {
-              this.setSrc_(story, storyUrl);
+          .then(() => {
+            if (!this.sanitizedUrlsAreEquals_(story.href, story.iframe.src)) {
+              this.setSrc_(story, story.href);
             }
           })
           // 3. Waits for player to be visible before updating visibility
@@ -1062,7 +1057,6 @@ export class AmpStoryPlayer {
           // 5. Finally update the story position.
           .then(() => {
             this.updatePosition_(story);
-
             if (story.distance === 0) {
               tryFocus(story.iframe);
             }
@@ -1701,17 +1695,24 @@ export class AmpStoryPlayer {
   /**
    * Show Player
    * @param {number} idx
+   * @param {string} url
    * @return {!Promise}
    */
-  showPlayer(idx) {
-    this.currentIdx_ = idx;
-    // const currentStory = this.stories_[this.currentIdx_];
-    // this.updateVisibilityState_(currentStory, VisibilityState.VISIBLE);
+  showPlayer(idx, url) {
+    this.currentIdx_ = -1;
+
+    const story = this.stories_[idx];
+    // const {iframe} = story;
+    // iframe.setAttribute('i-amphtml-iframe-position', 0);
+    this.updateVisibilityState_(story, VisibilityState.VISIBLE);
     // this.layoutCallback();
-    this.render_();
-    this.rootEl_.classList.add(LoadStateClass.LOADED);
-    this.element_.classList.add(LoadStateClass.LOADED);
-    this.element_.removeAttribute('hidden');
+    // this.render_();
+    this.show(url).then(() => {
+      this.rootEl_.classList.add(LoadStateClass.LOADED);
+      this.element_.classList.add(LoadStateClass.LOADED);
+      // this.updateVisibilityState_(story, VisibilityState.VISIBLE);
+    });
+    // this.element_.removeAttribute('hidden');
     // this.onNavigation_();
   }
 
@@ -1719,12 +1720,13 @@ export class AmpStoryPlayer {
    * Hide Player
    */
   hidePlayer() {
-    this.element_.setAttribute('hidden', '');
+    const story = this.stories_[this.currentIdx_];
     this.rootEl_.classList.remove(LoadStateClass.LOADED);
     this.element_.classList.remove(LoadStateClass.LOADED);
-    const story = this.stories_[this.currentIdx_];
-    const {iframe} = story;
-    // resetStyles(iframe, ['transform', 'transition']);
-    iframe.setAttribute('i-amphtml-iframe-position', -1);
+    this.updateVisibilityState_(story, VisibilityState.INACTIVE);
+    story.distance = -1;
+    this.currentIdx_ = -1;
+    this.updatePosition_(story);
+    // this.updateVisibilityState_(story, VisibilityState.INACTIVE);
   }
 }
