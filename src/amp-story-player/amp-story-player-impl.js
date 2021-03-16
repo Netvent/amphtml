@@ -240,6 +240,12 @@ export class AmpStoryPlayer {
 
     /** @private {boolean} */
     this.autoplay_ = true;
+
+    this.groupState_ = {
+      type: null,
+      source: null,
+      target: null,
+    };
   }
 
   /**
@@ -745,6 +751,7 @@ export class AmpStoryPlayer {
       this.currentIdx_ = storyIdx;
 
       renderPromise = this.render_(storyIdx);
+      this.groupState_.target = this.stories_[storyIdx].group;
       this.onNavigation_();
     }
 
@@ -806,6 +813,7 @@ export class AmpStoryPlayer {
     const navigation = {
       'index': index,
       'remaining': remaining,
+      'state': this.groupState_,
     };
 
     this.signalNavigation_(navigation);
@@ -888,6 +896,12 @@ export class AmpStoryPlayer {
       return;
     }
 
+    this.groupState_ = {
+      source: this.stories_[this.currentIdx_].group,
+      target: this.stories_[this.currentIdx_ + 1].group,
+      swiping: 'next',
+    };
+
     this.currentIdx_++;
     this.render_();
 
@@ -914,6 +928,11 @@ export class AmpStoryPlayer {
       return;
     }
 
+    this.groupState_ = {
+      source: this.stories_[this.currentIdx_].group,
+      target: this.stories_[this.currentIdx_ - 1].group,
+      swiping: 'previous',
+    };
     this.currentIdx_--;
     this.render_();
 
@@ -1022,7 +1041,6 @@ export class AmpStoryPlayer {
       // if (oldDistance <= 1 && story.distance > 1) {
       //   this.removeFromDom_(story);
       // }
-
       if (!story.iframe.isConnected) {
         this.appendToDom_(story);
       }
@@ -1296,12 +1314,13 @@ export class AmpStoryPlayer {
       case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
         this.onPageAttachmentStateUpdate_(/** @type {boolean} */ (data.value));
         break;
-      case STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID:
+      case STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID: {
         this.onCurrentPageIdUpdate_(
           /** @type {string} */ (data.value),
           messaging
         );
         break;
+      }
       case AMP_STORY_PLAYER_EVENT:
         this.onPlayerEvent_(/** @type {string} */ (data.value));
         break;
@@ -1349,6 +1368,10 @@ export class AmpStoryPlayer {
             dict({
               'pageId': pageId,
               'progress': progress.value,
+              'group': {
+                idx: this.currentIdx_,
+                ...this.stories_[this.currentIdx_].group,
+              },
             })
           )
         );
@@ -1700,12 +1723,12 @@ export class AmpStoryPlayer {
    */
   showPlayer(idx, url) {
     this.currentIdx_ = -1;
+
     const story = this.stories_[idx];
     this.updateVisibilityState_(story, VisibilityState.VISIBLE);
     this.show(url).then(() => {
       this.rootEl_.classList.add(LoadStateClass.LOADED);
       this.element_.classList.add(LoadStateClass.LOADED);
-      // this.updateVisibilityState_(story, VisibilityState.VISIBLE);
     });
   }
 
@@ -1713,6 +1736,12 @@ export class AmpStoryPlayer {
    * Hide Player
    */
   hidePlayer() {
+    this.groupState_ = {
+      type: null,
+      source: null,
+      target: null,
+    };
+
     const story = this.stories_[this.currentIdx_];
     this.rootEl_.classList.remove(LoadStateClass.LOADED);
     this.element_.classList.remove(LoadStateClass.LOADED);
