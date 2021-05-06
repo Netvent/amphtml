@@ -1721,18 +1721,17 @@ export class AmpStoryPlayer {
    * @param {string} url
    * @return {!Promise}
    */
-  showPlayer(idx, url) {
+  showPlayer(idx, url, pageId) {
     this.currentIdx_ = -1;
-
     const story = this.stories_[idx];
     this.updateVisibilityState_(story, VisibilityState.VISIBLE);
-    this.show(url).then(() => {
+    this.show(url, pageId).then(() => {
       this.rootEl_.classList.add(LoadStateClass.LOADED);
       this.element_.classList.add(LoadStateClass.LOADED);
     });
   }
 
-  /**
+  /**X
    * Hide Player
    */
   hidePlayer() {
